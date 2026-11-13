@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, get_args
 
 import click
 
@@ -6,6 +6,15 @@ from marker.config.crawler import crawler
 
 
 class CustomClickPrinter(click.Command):
+    @staticmethod
+    def option_type(annotation):
+        """Convert nullable scalar annotations to Click's concrete value type."""
+        arguments = get_args(annotation)
+        values = [value for value in arguments if value is not type(None)]
+        if type(None) in arguments and len(values) == 1:
+            return values[0]
+        return annotation
+
     def parse_args(self, ctx, args):
         display_help = "config" in args and "--help" in args
         if display_help:
@@ -59,7 +68,7 @@ class CustomClickPrinter(click.Command):
                 ctx.command.params.append(
                     click.Option(
                         ["--" + attr],
-                        type=info["type"],
+                        type=self.option_type(info["type"]),
                         help=" ".join(info["metadata"])
                         + f" (Applies to: {', '.join(info['classes'])})",
                         default=None,  # This is important, or it sets all the default keys again in config
@@ -98,7 +107,7 @@ class CustomClickPrinter(click.Command):
                         ctx.command.params.append(
                             click.Option(
                                 ["--" + class_name_attr, class_name_attr],
-                                type=attr_type,
+                                type=self.option_type(attr_type),
                                 help=" ".join(metadata),
                                 is_flag=is_flag,
                                 default=None,  # This is important, or it sets all the default keys again in config

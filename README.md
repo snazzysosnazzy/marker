@@ -22,6 +22,8 @@
 
 Marker converts documents to markdown, JSON, chunks, and HTML quickly and accurately.
 
+This fork adds local LightOnOCR recognition, selective visual extraction with protected page correction, Claude usage accounting, and direct ChatGPT plan-authorized correction. See [recognition and correction components](docs/reference_components.md) for installation, configuration, and programmatic integration. The core package remains version 2.2.0 with its existing licensing.
+
 - Converts PDF, image, PPTX, DOCX, XLSX, HTML, EPUB files in all languages
 - Formats tables, forms, equations, inline math, links, references, and code blocks
 - Extracts and saves images

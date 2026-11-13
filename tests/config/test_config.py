@@ -1,11 +1,13 @@
 import sys
 from contextlib import suppress
+from pathlib import Path
+
 import click
 import pytest
 
-from marker.config.printer import CustomClickPrinter
 from marker.config.crawler import crawler
 from marker.config.parser import ConfigParser
+from marker.config.printer import CustomClickPrinter
 
 # CPU-only: config/CLI parsing, no models or inference server.
 pytestmark = pytest.mark.cpu
@@ -93,11 +95,12 @@ def test_config_mode_auto_and_headers_footers(tmp_path):
     base_in = tmp_path / "in"
     nested_pdf = base_in / "sub" / "nested" / "report.pdf"
     out_folder = parser_out.get_output_folder(str(nested_pdf), base_in_folder=str(base_in))
-    assert out_folder.endswith("sub/nested/report")
+    assert Path(out_folder).parts[-3:] == ("sub", "nested", "report")
 
 
 def test_discover_input_files_and_skills(tmp_path):
     from click.testing import CliRunner
+
     from marker.scripts.convert import convert_cli, discover_input_files
     from marker.scripts.convert_single import convert_single_cli
 
@@ -112,10 +115,10 @@ def test_discover_input_files_and_skills(tmp_path):
     (sub_dir / "c.docx").write_bytes(b"docx")
 
     non_rec = discover_input_files(str(in_dir), recursive=False)
-    assert [f.split("/")[-1] for f in non_rec] == ["a.pdf", "b.png"]
+    assert [Path(f).name for f in non_rec] == ["a.pdf", "b.png"]
 
     rec = discover_input_files(str(in_dir), recursive=True)
-    assert [f.split("/")[-1] for f in rec] == ["a.pdf", "b.png", "c.docx"]
+    assert [Path(f).name for f in rec] == ["a.pdf", "b.png", "c.docx"]
 
     single = discover_input_files(str(in_dir / "a.pdf"), recursive=False)
     assert len(single) == 1 and single[0].endswith("a.pdf")
@@ -136,3 +139,9 @@ def test_discover_input_files_and_skills(tmp_path):
     res_ver = runner.invoke(convert_single_cli, ["--version"])
     assert res_ver.exit_code == 0
     assert "2.2.0" in res_ver.output
+
+
+def test_nullable_model_service_options():
+    kwargs = capture_kwargs(["test", "--claude_effort", "high", "--chatgpt_effort", "medium"])
+    assert kwargs["claude_effort"] == "high"
+    assert kwargs["chatgpt_effort"] == "medium"

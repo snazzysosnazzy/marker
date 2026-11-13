@@ -2,7 +2,7 @@ import base64
 import io
 import re
 from collections import Counter
-from typing import Annotated, Optional, Tuple, Literal
+from typing import Annotated, Literal, Optional, Tuple
 
 from bs4 import BeautifulSoup
 from pydantic import BaseModel
@@ -124,6 +124,7 @@ class BaseRenderer:
         }
         if document.debug_data_path is not None:
             metadata["debug_data_path"] = document.debug_data_path
+        metadata.update(document.metadata)
 
         return metadata
 

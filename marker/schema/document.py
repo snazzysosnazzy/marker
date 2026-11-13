@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import List, Sequence, Optional
+from typing import List, Optional, Sequence
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from marker.schema import BlockTypes
 from marker.schema.blocks import Block, BlockId, BlockOutput
@@ -28,6 +28,7 @@ class Document(BaseModel):
     block_type: BlockTypes = BlockTypes.Document
     table_of_contents: List[TocItem] | None = None
     debug_data_path: str | None = None  # Path that debug data was saved to
+    metadata: dict = Field(default_factory=dict)
     _page_index: dict | None = None  # page_id -> PageGroup, built lazily
 
     def get_block(self, block_id: BlockId):
